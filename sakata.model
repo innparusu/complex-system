@@ -19,15 +19,15 @@ UNIVERSE {
             Dim Y(0, 0) As Double = (0.0);
             Dim Layer(0, 0) As Integer = (0);
             Dim Direction(0, 0) As Double = (0.0);
-            Dim speed(0, 0) As Double = ();
+            Dim speed(0, 0) As Double = (0.0);
         }
         AgtType light(0, 0)[0] {
-            Dim ID(0, 0) As Integer = ();
-            Dim X(0, 0) As Double = ();
-            Dim Y(0, 0) As Double = ();
-            Dim Layer(0, 0) As Integer = ();
-            Dim Direction(0, 0) As Double = ();
-            Dim State(0, 0) <1>  As Integer = ();
+            Dim ID(0, 0) As Integer = (0);
+            Dim X(0, 0) As Double = (0.0);
+            Dim Y(0, 0) As Double = (0.0);
+            Dim Layer(0, 0) As Integer = (0);
+            Dim Direction(0, 0) As Double = (0.0);
+            Dim State(0, 0) <1>  As Integer = (0);
         }
     }
     Dim pop(0, 0) As Integer = (0);
@@ -93,16 +93,33 @@ Agt_Step{
 Dim lights As Agtset
 MakeOneAgtsetAroundOwn(lights, 10.0, Universe.cross.light, False)
 For each light in lights
-  if light.state == Color_Red then
-    if My.speed > 0 Then
-      My.speed = My.speed - Rnd() * 1.0
-      if My.speed < 0 Then
-        My.speed = 0
-      End if
-    End if
+  If light.state == Color_Red then
+    speedDown(Rnd() * 1.0)
+  Else
+    speedUp(Rnd() * 1.0)
   End if
 Next light
 Forward(My.speed)
+}
+
+Sub speedDown(speed As Double)
+{
+if My.speed > 0 Then
+  My.speed = My.speed - speed
+  if My.speed < 0 Then
+    My.speed = 0
+  End if
+End if
+}
+
+Sub speedUp(speed as Double)
+{
+if My.speed < 5 Then
+  My.speed = My.speed + speed
+  if My.speed > 5 Then
+    My.speed = 5
+  End if
+End if
 }
 #end_rule UNIVERSE.CROSS.CAR
 
@@ -169,8 +186,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 100;
-    Position_y = 100;
+    Position_x = 110;
+    Position_y = 9;
     Size_x = 500;
     Size_y = 300;
     Map_Cell_Size = 4;
@@ -274,7 +291,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 0, 2, 150, 100;
+    Display_Area = 0, 23, 150, 100;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -349,7 +366,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 273, 420, 800, 700;
+    Window_Name = Main_Window, 964, 145, 800, 700;
     Window_Name = Output_Setting_Window, 175, 175, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
