@@ -30,18 +30,18 @@ UNIVERSE {
             Dim State(0, 0) <1>  As Integer = (0);
         }
         AgtType point(0, 0)[11] {
-            Dim ID(0, 0) As Integer = ();
-            Dim X(0, 0) As Double = ();
-            Dim Y(0, 0) As Double = ();
-            Dim Layer(0, 0) As Integer = ();
-            Dim Direction(0, 0) As Double = ();
+            Dim ID(0, 0) As Integer = (0);
+            Dim X(0, 0) As Double = (0.0);
+            Dim Y(0, 0) As Double = (0.0);
+            Dim Layer(0, 0) As Integer = (0);
+            Dim Direction(0, 0) As Double = (0.0);
         }
     }
     Dim pop(0, 0) As Integer = (0);
     AgtType link(0, 0)[12] {
-        Dim ID(0, 0) As Integer = ();
-        Dim Begin_Agt(0, 0) As Agt = ();
-        Dim End_Agt(0, 0) As Agt = ();
+        Dim ID(0, 0) As Integer = (0);
+        Dim Begin_Agt(0, 0) As Agt = (0);
+        Dim End_Agt(0, 0) As Agt = (0);
     }
 }
 
@@ -107,6 +107,25 @@ Agt_Init{
 
 Agt_Step{
 
+if isSpeedUp() then
+  speedUp(Rnd() * 1.0)
+else
+  speedDown(Rnd() * 1.0)
+End iF
+
+Dim lights As Agtset
+Forward(1)
+MakeOneAgtsetAroundOwn(lights, 1, Universe.cross.light, False)
+Forward(-1)
+
+if CountAgtSet(lights) != 0 Then
+	Turn(90)
+End if
+Forward(My.speed)
+}
+
+Function isSpeedUp() As Boolean
+{
 Dim lights As Agtset
 Forward(5)
 MakeOneAgtsetAroundOwn(lights, 5, Universe.cross.light, False)
@@ -117,26 +136,17 @@ Forward(5)
 MakeOneAgtsetAroundOwn(cars, 5, Universe.cross.car, False)
 Forward(-5)
 
-if My.speed < 5.0 and CountAgtSet(lights) == 0 and CountAgtset(cars) == 0 Then
-  speedUp(Rnd() * 1.0)
-End if
-
 For each light in lights
-  If GetHistory(light.state, 1) == Color_Red or CountAgtset(cars) != 0 then
-    speedDown(Rnd() * 1.0)
-  Else
-    speedUp(Rnd() * 1.0)
+  if GetHistory(light.state, 1) == Color_Red or CountAgtset(cars) != 0 then
+    return False
   End if
 Next light
 
-Forward(1)
-MakeOneAgtsetAroundOwn(lights, 1, Universe.cross.light, False)
-Forward(-1)
-
-if CountAgtSet(lights) != 0 Then
-	Turn(90)
+if My.speed < 5.0 Then
+  return true
 End if
-Forward(My.speed)
+
+return False
 }
 
 Sub speedDown(speed As Double)
@@ -496,7 +506,7 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 764, 152, 960, 589;
+    Window_Name = Main_Window, 1205, 126, 800, 700;
     Window_Name = Output_Setting_Window, 255, 119, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
