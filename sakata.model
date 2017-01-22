@@ -23,7 +23,7 @@ UNIVERSE {
             Dim RouteCount(0, 0) As Integer = (0);
             Dim RouteArray(0, 0)[1] As String = ("");
         }
-        AgtType light(0, 0)[1] {
+        AgtType light(0, 0)[3] {
             Dim ID(0, 0) As Integer = (0);
             Dim X(0, 0) As Double = (0.0);
             Dim Y(0, 0) As Double = (0.0);
@@ -55,10 +55,10 @@ UNIVERSE {
 //-------------------------------------------------------
 Initial_Value {
     UNIVERSE.POP = 1(100);
-    UNIVERSE.LIMITSPEED = 1(2.0);
-    UNIVERSE.CROSS.LIGHT.X = 1(23.971377459749554);
-    UNIVERSE.CROSS.LIGHT.Y = 1(34.61538461538461);
-    UNIVERSE.CROSS.LIGHT.LAYER = 1(0);
+    UNIVERSE.LIMITSPEED = 1(0.8);
+    UNIVERSE.CROSS.LIGHT.X = 3(25.13416815742397, 22.987477638640428, 22.62969588550984);
+    UNIVERSE.CROSS.LIGHT.Y = 3(2*36.76207513416816, 17.262969588550988);
+    UNIVERSE.CROSS.LIGHT.LAYER = 3(3*0);
     UNIVERSE.CROSS.POINT.X = 11(47.227191413237925, 28.17531305903399, 30.41144901610018, 25.13416815742397, 2*23.25581395348837, 20.75134168157424, 23.613595706618963, 22.450805008944542, 26.028622540250446, 15.295169946332736);
     UNIVERSE.CROSS.POINT.Y = 11(47.49552772808587, 49.37388193202147, 41.94991055456172, 36.76207513416816, 40.69767441860465, 36.22540250447227, 11.71735241502683, 32.55813953488372, 17.262969588550988, 12.701252236135957
 , 14.758497316636848);
@@ -78,14 +78,14 @@ For i = 0 To Universe.pop - 1
   car = createAgt(Universe.cross.car)
 Next i
 */
-
+/*
 Dim light As Agt
 light = createAgt(Universe.cross.light)
 light.x = 25
 light.y = 25
 light.direction = 180
 light.state = Color_Red
-
+*/
 }
 
 Univ_Step_Begin{
@@ -129,6 +129,7 @@ if My.RouteCount > 0 Then
 	  My.RouteCount = My.RouteCount + 1
 	  if CountToken(My.RouteArray) <= My.RouteCount Then
 	    My.RouteCount = -1
+	    DelAgt(My)
 	    PrintLn("ゴール")
 	  end if
 	end if
@@ -155,9 +156,9 @@ end if
 
 
 Dim lights As Agtset
-Forward(5)
-MakeOneAgtsetAroundOwn(lights, 2, Universe.cross.light, False)
-Forward(-5)
+Forward(1)
+MakeOneAgtsetAroundOwn(lights, 1, Universe.cross.light, False)
+Forward(-1)
 
 For each light in lights
 	if GetHistory(light.state, 1) == Color_Red then
@@ -217,18 +218,27 @@ End if
 //-------------------------------------------------------
 #begin_rule UNIVERSE.CROSS.POINT
 Agt_Init{
-  Dim car As Agt
-
-  if My.ID == 0 Then
-    car = CreateAgt(Universe.cross.car)
-    car.x = My.x
-    car.y = My.y
-    car.routeArray = "0, 2, 3, 7, 8, 10"
-  End If
 }
 
 Agt_Step{
+if My.ID == 0 then
+  createCarAgt("0, 2, 3, 7, 8, 10")
+elseif My.ID == 1 then
+  createCarAgt("1, 4, 5, 7, 8, 10")
+End If
+}
 
+sub createCarAgt(routeArray as String)
+{
+Dim cars As AgtSet
+MakeAgtSet(cars, Universe.cross.car)
+Dim car As Agt
+if CountAgtSet(cars) <= Universe.pop then
+  car = CreateAgt(Universe.cross.car)
+  car.x = My.x
+  car.y = My.y
+  car.routeArray = routeArray
+End if
 }
 #end_rule UNIVERSE.CROSS.POINT
 
@@ -290,8 +300,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 83;
-    Position_y = 17;
+    Position_x = 489;
+    Position_y = 82;
     Size_x = 960;
     Size_y = 497;
     Map_Cell_Size = 4;
@@ -389,7 +399,7 @@ Map_Output {
         Agent_Image_Transparency_Variable_Name = "Universe.cross.light.ID";
     }
     Output {
-        Map_Element_Name = "point";
+        Map_Element_Name = "Point";
         Map_Element = Agent_Variable;
         Output_Expression = "Universe.cross.point";
         Draw_Line = No;
@@ -402,8 +412,8 @@ Map_Output {
         Line_Arrow_Variable = "";
         Line_Width_Variable = "";
         Line_Color_Variable = "";
-        Agent_Color = 255,0,0;
-        Marker_Id = 1;
+        Agent_Color = 255,255,0;
+        Marker_Id = 4;
         Effective_Figures = 0;
         Format_Id = 0;
         Agent_Image_Direction = No;
@@ -428,7 +438,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 0, 23, 150, 100;
+    Display_Area = 0, 23, 150, 138;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -445,6 +455,22 @@ Control_Panel {
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 1.0;
         Slider_Value = "100";
+    }
+    Panel_Item {
+        Item_Type = Slider;
+        Item_Name = "LimitSpeed";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.limitSpeed";
+        Slider_Range_Max = 10;
+        Slider_Value_Min = 0.0;
+        Slider_Value_Step = 0.1;
+        Slider_Value = "8";
     }
 }
 
@@ -510,7 +536,7 @@ Space_Map_Initial_Value {
         Agent_Name = Universe.cross.light;
         Marker_Color = 255, 0, 0;
         Marker_Id = 3;
-        Value = (23.971377459749554,34.61538461538461,0);
+        Value = (25.13416815742397,36.76207513416816,0),(22.987477638640428,36.76207513416816,0),(22.62969588550984,17.262969588550988,0);
     }
     Position_Agent {
         Agent_Name = Universe.cross.point;
@@ -537,8 +563,8 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 572, 23, 800, 700;
-    Window_Name = Output_Setting_Window, 255, 119, 480, 350;
+    Window_Name = Main_Window, 572, 23, 1348, 1177;
+    Window_Name = Output_Setting_Window, 449, 413, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
 
