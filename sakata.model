@@ -38,7 +38,7 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.POP = 1(17);
+    UNIVERSE.POP = 1(100);
 }
 
 
@@ -90,15 +90,36 @@ Agt_Init{
 }
 
 Agt_Step{
+
 Dim lights As Agtset
-MakeOneAgtsetAroundOwn(lights, 10.0, Universe.cross.light, False)
+Forward(5)
+MakeOneAgtsetAroundOwn(lights, 5, Universe.cross.light, False)
+Forward(-5)
+
+Dim cars As Agtset 
+Forward(5)
+MakeOneAgtsetAroundOwn(cars, 5, Universe.cross.car, False)
+Forward(-5)
+
+if My.speed < 5.0 and CountAgtSet(lights) == 0 and CountAgtset(cars) == 0 Then
+  speedUp(Rnd() * 1.0)
+End if
+
 For each light in lights
-  If light.state == Color_Red then
+  If GetHistory(light.state, 1) == Color_Red or CountAgtset(cars) != 0 then
     speedDown(Rnd() * 1.0)
   Else
     speedUp(Rnd() * 1.0)
   End if
 Next light
+
+Forward(1)
+MakeOneAgtsetAroundOwn(lights, 1, Universe.cross.light, False)
+Forward(-1)
+
+if CountAgtSet(lights) != 0 Then
+	Turn(90)
+End if
 Forward(My.speed)
 }
 
@@ -114,10 +135,10 @@ End if
 
 Sub speedUp(speed as Double)
 {
-if My.speed < 5 Then
+if My.speed < 2 Then
   My.speed = My.speed + speed
-  if My.speed > 5 Then
-    My.speed = 5
+  if My.speed > 2 Then
+    My.speed = 2
   End if
 End if
 }
@@ -186,8 +207,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 110;
-    Position_y = 9;
+    Position_x = 323;
+    Position_y = 52;
     Size_x = 500;
     Size_y = 300;
     Map_Cell_Size = 4;
@@ -266,7 +287,7 @@ Map_Output {
         Line_Width_Variable = "";
         Line_Color_Variable = "";
         Agent_Color = "Universe.cross.light.State";
-        Marker_Id = 1;
+        Marker_Id = 3;
         Effective_Figures = 0;
         Format_Id = 0;
         Agent_Image_Direction = No;
@@ -307,7 +328,7 @@ Control_Panel {
         Slider_Range_Max = 100;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 1.0;
-        Slider_Value = "17";
+        Slider_Value = "100";
     }
 }
 
@@ -366,7 +387,7 @@ Network_Info {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 964, 145, 800, 700;
+    Window_Name = Main_Window, 932, 23, 960, 1177;
     Window_Name = Output_Setting_Window, 175, 175, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
