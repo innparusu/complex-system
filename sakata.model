@@ -19,17 +19,18 @@ UNIVERSE {
             Dim Y(0, 0) As Double = (0.0);
             Dim Layer(0, 0) As Integer = (0);
             Dim Direction(0, 0) As Double = (0.0);
-            Dim Speed(0, 0) As Double = ();
-            Dim RouteCount(0, 0) As Integer = ();
-            Dim RouteArray(0, 0)[1] As String = ();
+            Dim Speed(0, 0) As Double = (0.0);
+            Dim RouteCount(0, 0) As Integer = (0);
+            Dim RouteArray(0, 0)[1] As String = ("");
         }
-        AgtType light(0, 0)[0] {
+        AgtType light(0, 0)[1] {
             Dim ID(0, 0) As Integer = (0);
             Dim X(0, 0) As Double = (0.0);
             Dim Y(0, 0) As Double = (0.0);
             Dim Layer(0, 0) As Integer = (0);
             Dim Direction(0, 0) As Double = (0.0);
             Dim State(0, 0) <1>  As Integer = (0);
+            Dim ChangeStep(0, 0) As Integer = ();
         }
         AgtType point(0, 0)[11] {
             Dim ID(0, 0) As Integer = (0);
@@ -45,6 +46,7 @@ UNIVERSE {
         Dim Begin_Agt(0, 0) As Agt = (0);
         Dim End_Agt(0, 0) As Agt = (0);
     }
+    Dim limitSpeed(0, 0) As Double = (0.0);
 }
 
 
@@ -53,6 +55,10 @@ UNIVERSE {
 //-------------------------------------------------------
 Initial_Value {
     UNIVERSE.POP = 1(100);
+    UNIVERSE.LIMITSPEED = 1(2.0);
+    UNIVERSE.CROSS.LIGHT.X = 1(23.971377459749554);
+    UNIVERSE.CROSS.LIGHT.Y = 1(34.61538461538461);
+    UNIVERSE.CROSS.LIGHT.LAYER = 1(0);
     UNIVERSE.CROSS.POINT.X = 11(47.227191413237925, 28.17531305903399, 30.41144901610018, 25.13416815742397, 2*23.25581395348837, 20.75134168157424, 23.613595706618963, 22.450805008944542, 26.028622540250446, 15.295169946332736);
     UNIVERSE.CROSS.POINT.Y = 11(47.49552772808587, 49.37388193202147, 41.94991055456172, 36.76207513416816, 40.69767441860465, 36.22540250447227, 11.71735241502683, 32.55813953488372, 17.262969588550988, 12.701252236135957
 , 14.758497316636848);
@@ -67,9 +73,11 @@ Initial_Value {
 Univ_Init{
 Dim i As Integer
 Dim car As Agt
+/*
 For i = 0 To Universe.pop - 1
   car = createAgt(Universe.cross.car)
 Next i
+*/
 
 Dim light As Agt
 light = createAgt(Universe.cross.light)
@@ -104,7 +112,7 @@ Agt_Init{
 	My.x = 25
 	My.y = 0
 	My.Direction = 90
-	My.speed = Rnd() * 2
+	My.speed = Rnd() * Universe.limitSpeed
 	My.RouteCount = 1
 }
 
@@ -112,11 +120,11 @@ Agt_Step{
 Dim targetPointID As Integer
 Dim targetPointAgt As Agt
 Dim distance AS Double
-
+println(My.speed)
 if My.RouteCount > 0 Then
 	targetPointID = CInt(GetToken(My.RouteArray, My.RouteCount))
 	targetPointAgt = Universe.cross.point(targetPointID)
-	distance = Pursue(targetPointAgt, 1)
+	distance = Pursue(targetPointAgt, My.speed)
 	if distance > 0 Then
 	  My.RouteCount = My.RouteCount + 1
 	  if CountToken(My.RouteArray) <= My.RouteCount Then
@@ -127,15 +135,16 @@ if My.RouteCount > 0 Then
 end if
 
 if isSpeedUp() then
-  speedUp(Rnd() * 1.0)
+  speedUp(Rnd() * 2.0)
 else
-  speedDown(Rnd() * 1.0)
+  speedDown(Rnd() * 2.0)
 end if
 }
 
 Function isSpeedUp() As Boolean
 {
 Dim cars As Agtset 
+
 Forward(2)
 MakeOneAgtsetAroundOwn(cars, 1, Universe.cross.car, False)
 Forward(-2)
@@ -144,9 +153,10 @@ if CountAgtset(cars) != 0 then
   return False
 end if
 
+
 Dim lights As Agtset
 Forward(5)
-MakeOneAgtsetAroundOwn(lights, 5, Universe.cross.light, False)
+MakeOneAgtsetAroundOwn(lights, 2, Universe.cross.light, False)
 Forward(-5)
 
 For each light in lights
@@ -155,11 +165,7 @@ For each light in lights
 	end if
 next light
 
-if My.speed < 5.0 then
-  return true
-end if
-
-return False
+return true
 }
 
 Sub speedDown(speed As Double)
@@ -174,11 +180,9 @@ end if
 
 Sub speedUp(speed as Double)
 {
-if My.speed < 2 Then
-  My.speed = My.speed + speed
-  if My.speed > 2 Then
-    My.speed = 2
-  end if
+My.speed = My.speed + speed
+if My.speed > Universe.limitSpeed Then
+  My.speed = Universe.limitSpeed
 end if
 }
 #end_rule UNIVERSE.CROSS.CAR
@@ -191,10 +195,11 @@ end if
 //-------------------------------------------------------
 #begin_rule UNIVERSE.CROSS.LIGHT
 Agt_Init{
+  My.changeStep = 10
 }
 
 Agt_Step{
-if getcountStep() Mod 20 == 0 Then
+if getcountStep() Mod My.changeStep == 0 Then
    if My.state == Color_Red Then
      My.state = Color_Blue
    Else
@@ -285,8 +290,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 33;
-    Position_y = 23;
+    Position_x = 83;
+    Position_y = 17;
     Size_x = 960;
     Size_y = 497;
     Map_Cell_Size = 4;
@@ -463,8 +468,8 @@ Others_Data {
     Debug_Position_y = 75;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 37;
-    Console_Position_y = 597;
+    Console_Position_x = 95;
+    Console_Position_y = 384;
     Console_Size_x = 600;
     Console_Size_y = 120;
     Componen_Tree_Position_x = 2;
@@ -499,8 +504,14 @@ Network_Info {
 //-------------------------------------------------------
 Space_Map_Initial_Value {
     Space_Path_Name = Universe.cross;
-    Background_Image_File_Path_Name = "../../../Desktop/Screen Shot 2017-01-23 at 03.03.04.png";
+    Background_Image_File_Path_Name = "map.png";
     Origin_Position = Left_Bottom;
+    Position_Agent {
+        Agent_Name = Universe.cross.light;
+        Marker_Color = 255, 0, 0;
+        Marker_Id = 3;
+        Value = (23.971377459749554,34.61538461538461,0);
+    }
     Position_Agent {
         Agent_Name = Universe.cross.point;
         Marker_Color = 255, 0, 0;
@@ -526,7 +537,7 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 879, 23, 800, 700;
+    Window_Name = Main_Window, 572, 23, 800, 700;
     Window_Name = Output_Setting_Window, 255, 119, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
