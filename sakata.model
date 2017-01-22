@@ -29,8 +29,20 @@ UNIVERSE {
             Dim Direction(0, 0) As Double = (0.0);
             Dim State(0, 0) <1>  As Integer = (0);
         }
+        AgtType point(0, 0)[11] {
+            Dim ID(0, 0) As Integer = ();
+            Dim X(0, 0) As Double = ();
+            Dim Y(0, 0) As Double = ();
+            Dim Layer(0, 0) As Integer = ();
+            Dim Direction(0, 0) As Double = ();
+        }
     }
     Dim pop(0, 0) As Integer = (0);
+    AgtType link(0, 0)[12] {
+        Dim ID(0, 0) As Integer = ();
+        Dim Begin_Agt(0, 0) As Agt = ();
+        Dim End_Agt(0, 0) As Agt = ();
+    }
 }
 
 
@@ -39,6 +51,10 @@ UNIVERSE {
 //-------------------------------------------------------
 Initial_Value {
     UNIVERSE.POP = 1(100);
+    UNIVERSE.CROSS.POINT.X = 11(47.227191413237925, 28.17531305903399, 30.41144901610018, 25.13416815742397, 2*23.25581395348837, 20.75134168157424, 23.613595706618963, 22.450805008944542, 26.028622540250446, 15.295169946332736);
+    UNIVERSE.CROSS.POINT.Y = 11(47.49552772808587, 49.37388193202147, 41.94991055456172, 36.76207513416816, 40.69767441860465, 36.22540250447227, 11.71735241502683, 32.55813953488372, 17.262969588550988, 12.701252236135957
+, 14.758497316636848);
+    UNIVERSE.CROSS.POINT.LAYER = 11(11*0);
 }
 
 
@@ -169,6 +185,38 @@ End if
 
 
 //-------------------------------------------------------
+// Agent Rule
+//-------------------------------------------------------
+#begin_rule UNIVERSE.CROSS.POINT
+Agt_Init{
+
+}
+
+Agt_Step{
+
+}
+#end_rule UNIVERSE.CROSS.POINT
+
+
+
+
+//-------------------------------------------------------
+// Agent Rule
+//-------------------------------------------------------
+#begin_rule UNIVERSE.LINK
+Agt_Init{
+
+}
+
+Agt_Step{
+
+}
+#end_rule UNIVERSE.LINK
+
+
+
+
+//-------------------------------------------------------
 // Simulation Definition Division
 //-------------------------------------------------------
 Single_Simulation {
@@ -207,10 +255,10 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 323;
-    Position_y = 52;
-    Size_x = 500;
-    Size_y = 300;
+    Position_x = 0;
+    Position_y = 0;
+    Size_x = 960;
+    Size_y = 497;
     Map_Cell_Size = 4;
     Remarks = Yes;
     Legend_Pos = Top;
@@ -233,10 +281,10 @@ Map_Output {
     Target_Layer = 0;
     Coordinate_Display = No;
     Space_Kind = Square_2D;
-    BG_Pict = No;
+    BG_Pict = Yes;
     BG_Type = 0;
     BG_Var_Name = "";
-    BG_File_Name = "";
+    BG_File_Name = "map.png";
     Origin_Position = 2;
     Output_Group_Name = "";
     Output {
@@ -304,6 +352,39 @@ Map_Output {
         Agent_Image_Transparency_by_value = Yes;
         Agent_Image_Transparency_Value = 0.0;
         Agent_Image_Transparency_Variable_Name = "Universe.cross.light.ID";
+    }
+    Output {
+        Map_Element_Name = "point";
+        Map_Element = Agent_Variable;
+        Output_Expression = "Universe.cross.point";
+        Draw_Line = No;
+        Collection_Name = "";
+        Line_Type = 0;
+        Line_Arrow = 0;
+        Line_Width = 0;
+        Line_Color = 0, 0, 0;
+        Line_Type_Variable = "";
+        Line_Arrow_Variable = "";
+        Line_Width_Variable = "";
+        Line_Color_Variable = "";
+        Agent_Color = 255,0,0;
+        Marker_Id = 1;
+        Effective_Figures = 0;
+        Format_Id = 0;
+        Agent_Image_Direction = No;
+        Icon_Type = 0;
+        Icon_Var_Name = "";
+        Icon_Transparent = No;
+        Icon_Enlarg_Reduce = No;
+        Icon_File_Name = "";
+        Num_Display = Yes;
+        Num_Var_Name = "Universe.cross.point.ID";
+        Agent_Image_Magnify_by_value = Yes;
+        Agent_Image_Magnify_Value = 1.0;
+        Agent_Image_Magnify_Variable_Name = "Universe.cross.point.ID";
+        Agent_Image_Transparency_by_value = Yes;
+        Agent_Image_Transparency_Value = 0.0;
+        Agent_Image_Transparency_Variable_Name = "Universe.cross.point.ID";
     }
 }
 
@@ -384,11 +465,39 @@ Network_Info {
 
 
 //-------------------------------------------------------
+// Space Map Initial Value Definition Division
+//-------------------------------------------------------
+Space_Map_Initial_Value {
+    Space_Path_Name = Universe.cross;
+    Background_Image_File_Path_Name = "../../../Desktop/Screen Shot 2017-01-23 at 03.03.04.png";
+    Origin_Position = Left_Bottom;
+    Position_Agent {
+        Agent_Name = Universe.cross.point;
+        Marker_Color = 255, 0, 0;
+        Marker_Id = 1;
+        Value = (47.227191413237925,47.49552772808587,0),(28.17531305903399,49.37388193202147,0),(30.41144901610018,41.94991055456172,0),(25.13416815742397,36.76207513416816,0),(23.25581395348837,40.69767441860465,0)
+               ,(23.25581395348837,36.22540250447227,0),(20.75134168157424,11.71735241502683,0),(23.613595706618963,32.55813953488372,0),(22.450805008944542,17.262969588550988,0),(26.028622540250446,12.701252236135957,0)
+               ,(15.295169946332736,14.758497316636848,0);
+    }
+    Link_Agent {
+        Agent_Name = Universe.link;
+        Line_Color = 0, 255, 0;
+        Line_Type = 1;
+        Arrow_Type = 1;
+        Link_Id = "Universe.cross.point/Universe.cross.point";
+        Link = (0,1,4),(0,4,4),(0,4,5),(0,0,2),(0,2,3)
+              ,(0,5,7),(0,3,7),(0,7,8),(0,8,6),(0,8,10)
+              ,(0,10,8),(0,8,9);
+    }
+}
+
+
+//-------------------------------------------------------
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 932, 23, 960, 1177;
-    Window_Name = Output_Setting_Window, 175, 175, 480, 350;
+    Window_Name = Main_Window, 764, 152, 960, 589;
+    Window_Name = Output_Setting_Window, 255, 119, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
 
