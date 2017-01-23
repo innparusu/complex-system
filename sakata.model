@@ -47,6 +47,7 @@ UNIVERSE {
         Dim End_Agt(0, 0) As Agt = (0);
     }
     Dim limitSpeed(0, 0) As Double = (0.0);
+    Dim InterVehicleDistance(0, 0) As Integer = ();
 }
 
 
@@ -56,6 +57,7 @@ UNIVERSE {
 Initial_Value {
     UNIVERSE.POP = 1(51);
     UNIVERSE.LIMITSPEED = 1(0.8);
+    UNIVERSE.INTERVEHICLEDISTANCE = 1(1);
     UNIVERSE.CROSS.LIGHT.X = 3(25.13416815742397, 22.987477638640428, 22.62969588550984);
     UNIVERSE.CROSS.LIGHT.Y = 3(2*36.76207513416816, 17.262969588550988);
     UNIVERSE.CROSS.LIGHT.LAYER = 3(3*0);
@@ -110,9 +112,6 @@ Univ_Finish{
 //-------------------------------------------------------
 #begin_rule UNIVERSE.CROSS.CAR
 Agt_Init{
-	My.x = 25
-	My.y = 0
-	My.Direction = 90
 	My.speed = Rnd() * Universe.limitSpeed
 	My.RouteCount = 1
 }
@@ -147,9 +146,9 @@ Function isSpeedUp() As Boolean
 {
 Dim cars As Agtset 
 
-Forward(2)
-MakeOneAgtsetAroundOwn(cars, 1, Universe.cross.car, False)
-Forward(-2)
+Forward(Universe.InterVehicleDistance)
+MakeOneAgtsetAroundOwn(cars, Universe.InterVehicleDistance, Universe.cross.car, False)
+Forward(-Universe.InterVehicleDistance)
 
 if CountAgtset(cars) != 0 then
   return False
@@ -301,8 +300,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 715;
-    Position_y = 3;
+    Position_x = 671;
+    Position_y = 164;
     Size_x = 960;
     Size_y = 497;
     Map_Cell_Size = 4;
@@ -439,7 +438,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 0, 23, 150, 138;
+    Display_Area = 0, 23, 267, 182;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -472,6 +471,22 @@ Control_Panel {
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 0.1;
         Slider_Value = "8";
+    }
+    Panel_Item {
+        Item_Type = Slider;
+        Item_Name = "InterVehicleDistance";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.InterVehicleDistance";
+        Slider_Range_Max = 5;
+        Slider_Value_Min = 0.0;
+        Slider_Value_Step = 1.0;
+        Slider_Value = "1";
     }
 }
 
@@ -564,7 +579,7 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 220, 23, 1843, 1088;
+    Window_Name = Main_Window, 317, 45, 1843, 1088;
     Window_Name = Output_Setting_Window, 449, 413, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
