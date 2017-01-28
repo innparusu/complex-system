@@ -40,7 +40,6 @@ UNIVERSE {
             Dim Direction(0, 0) As Double = (0.0);
         }
     }
-    Dim pop(0, 0) As Integer = (0);
     AgtType link(0, 0)[13] {
         Dim ID(0, 0) As Integer = (0);
         Dim Begin_Agt(0, 0) As Agt = (0);
@@ -48,6 +47,9 @@ UNIVERSE {
     }
     Dim limitSpeed(0, 0) As Double = (0.0);
     Dim InterVehicleDistance(0, 0) As Integer = (0);
+    Dim pop(0, 0) As Integer = (0);
+    Dim ratio(0, 0) As Double = ();
+    Dim interval(0, 0) As Integer = ();
 }
 
 
@@ -55,9 +57,11 @@ UNIVERSE {
 // Agent Variable Initial Data
 //-------------------------------------------------------
 Initial_Value {
-    UNIVERSE.POP = 1(22);
     UNIVERSE.LIMITSPEED = 1(0.8);
     UNIVERSE.INTERVEHICLEDISTANCE = 1(1);
+    UNIVERSE.POP = 1(10);
+    UNIVERSE.RATIO = 1(0.060000000000000005);
+    UNIVERSE.INTERVAL = 1(23);
     UNIVERSE.CROSS.LIGHT.X = 3(25.13416815742397, 22.987477638640428, 22.62969588550984);
     UNIVERSE.CROSS.LIGHT.Y = 3(2*36.76207513416816, 17.262969588550988);
     UNIVERSE.CROSS.LIGHT.LAYER = 3(3*0);
@@ -103,7 +107,6 @@ Univ_Step_End{
 }
 
 Univ_Finish{
-
 #end_rule UNIVERSE
 
 
@@ -131,7 +134,7 @@ if My.RouteCount > 0 Then
 	  if CountToken(My.RouteArray) <= My.RouteCount Then
 	    My.RouteCount = -1
 	    DelAgt(My)
-	    PrintLn("郢ｧ�ｽｴ郢晢ｽｼ郢晢ｽｫ")
+	    PrintLn("驛｢�ｽｧ�ｿｽ�ｽｽ�ｽｴ驛｢譎｢�ｽｽ�ｽｼ驛｢譎｢�ｽｽ�ｽｫ")
 	  end if
 	end if
 end if
@@ -197,7 +200,7 @@ end if
 //-------------------------------------------------------
 #begin_rule UNIVERSE.CROSS.LIGHT
 Agt_Init{
-  My.changeStep = 10
+  My.changeStep = Universe.interval
 }
 
 Agt_Step{
@@ -223,9 +226,9 @@ Agt_Init{
 }
 
 Agt_Step{
-if Rnd() < 0.5 then
+if Rnd() < Universe.ratio then
 	if My.ID == 0 then
-  	createCarAgt("0, 2, 10,  11, 5, 6, 8")
+  	createCarAgt("0, 2, 10, 11, 5, 6, 8")
 	elseif My.ID == 1 then
   	createCarAgt("1, 3, 9, 5, 6, 4")
 	End If
@@ -304,8 +307,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = 266;
-    Position_y = 20;
+    Position_x = -16;
+    Position_y = 64;
     Size_x = 1907;
     Size_y = 905;
     Map_Cell_Size = 14;
@@ -442,7 +445,7 @@ Map_Output {
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 1279, 284, 267, 182;
+    Display_Area = 927, 197, 438, 248;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -458,7 +461,7 @@ Control_Panel {
         Slider_Range_Max = 100;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 1.0;
-        Slider_Value = "22";
+        Slider_Value = "10";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -492,6 +495,38 @@ Control_Panel {
         Slider_Value_Step = 1.0;
         Slider_Value = "1";
     }
+    Panel_Item {
+        Item_Type = Slider;
+        Item_Name = "Ratio";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.ratio";
+        Slider_Range_Max = 99;
+        Slider_Value_Min = 0.01;
+        Slider_Value_Step = 0.01;
+        Slider_Value = "5";
+    }
+    Panel_Item {
+        Item_Type = Slider;
+        Item_Name = "Interval";
+        Display_Area = 0, 0, 0, 0;
+        Font_Name = "";
+        Font_Char_Set = 0;
+        Font_Size = 0.0;
+        Font_Style = 0;
+        Font_Color = 0, 0, 0;
+        Font_Background_Color = 0, 0, 0;
+        Var_Name = "Universe.interval";
+        Slider_Range_Max = 99;
+        Slider_Value_Min = 1.0;
+        Slider_Value_Step = 1.0;
+        Slider_Value = "22";
+    }
 }
 
 
@@ -514,8 +549,8 @@ Others_Data {
     Debug_Position_y = 178;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 857;
-    Console_Position_y = 511;
+    Console_Position_x = 886;
+    Console_Position_y = 676;
     Console_Size_x = 600;
     Console_Size_y = 146;
     Componen_Tree_Position_x = 2;
@@ -583,8 +618,8 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 0, 23, 1920, 1177;
-    Window_Name = Output_Setting_Window, 449, 413, 480, 350;
+    Window_Name = Main_Window, 795, 23, 960, 1177;
+    Window_Name = Output_Setting_Window, 255, 413, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
 
