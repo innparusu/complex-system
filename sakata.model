@@ -22,6 +22,7 @@ UNIVERSE {
             Dim Speed(0, 0) As Double = (0.0);
             Dim RouteCount(0, 0) As Integer = (0);
             Dim RouteArray(0, 0)[1] As String = ("");
+            Dim createStep(0, 0) As Integer = ();
         }
         AgtType light(0, 0)[3] {
             Dim ID(0, 0) As Integer = (0);
@@ -50,6 +51,9 @@ UNIVERSE {
     Dim pop(0, 0) As Integer = (0);
     Dim ratio(0, 0) As Double = ();
     Dim interval(0, 0) As Integer = ();
+    Dim goalAgtCount(0, 0) As Integer = ();
+    Dim goalAgtStepSum(0, 0) As Integer = ();
+    Dim averageGoalStep(0, 0) As Double = ();
 }
 
 
@@ -59,9 +63,9 @@ UNIVERSE {
 Initial_Value {
     UNIVERSE.LIMITSPEED = 1(0.8);
     UNIVERSE.INTERVEHICLEDISTANCE = 1(1);
-    UNIVERSE.POP = 1(10);
-    UNIVERSE.RATIO = 1(0.060000000000000005);
-    UNIVERSE.INTERVAL = 1(23);
+    UNIVERSE.POP = 1(15);
+    UNIVERSE.RATIO = 1(0.34);
+    UNIVERSE.INTERVAL = 1(22);
     UNIVERSE.CROSS.LIGHT.X = 3(25.13416815742397, 22.987477638640428, 22.62969588550984);
     UNIVERSE.CROSS.LIGHT.Y = 3(2*36.76207513416816, 17.262969588550988);
     UNIVERSE.CROSS.LIGHT.LAYER = 3(3*0);
@@ -103,7 +107,12 @@ Univ_Step_Begin{
 }
 
 Univ_Step_End{
-
+if (Universe.goalAgtCount == 0) then
+  Universe.averageGoalStep = 0
+else
+  Universe.averageGoalStep = Universe.goalAgtStepSum / Universe.goalAgtCount
+End if
+println(Universe.averageGoalStep)
 }
 
 Univ_Finish{
@@ -119,6 +128,7 @@ Univ_Finish{
 Agt_Init{
 	My.speed = Rnd() * Universe.limitSpeed
 	My.RouteCount = 1
+	My.createStep = getCountStep()
 }
 
 Agt_Step{
@@ -133,8 +143,9 @@ if My.RouteCount > 0 Then
 	  My.RouteCount = My.RouteCount + 1
 	  if CountToken(My.RouteArray) <= My.RouteCount Then
 	    My.RouteCount = -1
+	    Universe.goalAgtCount = Universe.goalAgtCount + 1
+	    Universe.goalAgtStepSum = Universe.goalAgtStepSum + (getCountStep() - My.createStep)
 	    DelAgt(My)
-	    PrintLn("驛｢�ｽｧ�ｿｽ�ｽｽ�ｽｴ驛｢譎｢�ｽｽ�ｽｼ驛｢譎｢�ｽｽ�ｽｫ")
 	  end if
 	end if
 end if
@@ -205,7 +216,7 @@ Agt_Init{
 
 Agt_Step{
 
-if getcountStep() Mod My.changeStep == 0 Then
+if getCountStep() Mod My.changeStep == 0 Then
    if My.state == Color_Red Then
      My.state = Color_Blue
    Else
@@ -307,8 +318,8 @@ Map_Output {
     Title = "";
     Disable = No;
     Background_Color = 255, 255, 255;
-    Position_x = -16;
-    Position_y = 64;
+    Position_x = -12;
+    Position_y = 104;
     Size_x = 1907;
     Size_y = 905;
     Map_Cell_Size = 14;
@@ -442,10 +453,52 @@ Map_Output {
 
 
 //-------------------------------------------------------
+// Time Graph Output Definition Division
+//-------------------------------------------------------
+Time_Graph {
+    Font_Name = "Dialog";
+    Font_Char_Set = 81;
+    Font_Size = 12.0;
+    Font_Style = 0;
+    Font_Color = 0, 0, 0;
+    Font_Background_Color = 255, 255, 255;
+    Draw_Timing = Simulation_Step;
+    Draw_Interval = 1;
+    Graph_Name = "AverageGoalStep";
+    Title = "AverageGoalStep";
+    Disable = No;
+    Background_Color = 255, 255, 255;
+    Remarks = Yes;
+    Legend_Pos = Top;
+    FastDraw = Yes;
+    Position_x = 774;
+    Position_y = 97;
+    Size_x = 1021;
+    Size_y = 516;
+    Map_Cell_Size = -1;
+    Axis_Label = "Step", "GoalStep";
+    Draw_By_JFree_Chart = Yes;
+    Scale = 0, 0.0, 1000, 100.0, 100, 10.0;
+    ScaleAuto = Yes, Yes;
+    Output_Group_Name = "";
+    Output {
+        Graph_Element_Name = "AverageGoalStep";
+        Line_Color = 255, 0, 0;
+        Line_Width = 3;
+        Marker_Id = 0;
+        Output_Expression = "Universe.averageGoalStep";
+        Expression_Value_Display = No;
+        Effective_Fraction_Figures = 0;
+        Graph_Element_Color = (0, 255, 0);
+    }
+}
+
+
+//-------------------------------------------------------
 // Control Panel Definition Division
 //-------------------------------------------------------
 Control_Panel {
-    Display_Area = 927, 197, 438, 248;
+    Display_Area = 1426, 614, 438, 248;
     Display_Type = 0;
     Panel_Item {
         Item_Type = Slider;
@@ -461,7 +514,7 @@ Control_Panel {
         Slider_Range_Max = 100;
         Slider_Value_Min = 0.0;
         Slider_Value_Step = 1.0;
-        Slider_Value = "10";
+        Slider_Value = "15";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -509,7 +562,7 @@ Control_Panel {
         Slider_Range_Max = 99;
         Slider_Value_Min = 0.01;
         Slider_Value_Step = 0.01;
-        Slider_Value = "5";
+        Slider_Value = "33";
     }
     Panel_Item {
         Item_Type = Slider;
@@ -525,7 +578,7 @@ Control_Panel {
         Slider_Range_Max = 99;
         Slider_Value_Min = 1.0;
         Slider_Value_Step = 1.0;
-        Slider_Value = "22";
+        Slider_Value = "21";
     }
 }
 
@@ -549,8 +602,8 @@ Others_Data {
     Debug_Position_y = 178;
     Debug_Size_x = 400;
     Debug_Size_y = 200;
-    Console_Position_x = 886;
-    Console_Position_y = 676;
+    Console_Position_x = 888;
+    Console_Position_y = 643;
     Console_Size_x = 600;
     Console_Size_y = 146;
     Componen_Tree_Position_x = 2;
@@ -618,8 +671,8 @@ Space_Map_Initial_Value {
 // Window Location Definition Division
 //-------------------------------------------------------
 Window_Rectangle {
-    Window_Name = Main_Window, 795, 23, 960, 1177;
-    Window_Name = Output_Setting_Window, 255, 413, 480, 350;
+    Window_Name = Main_Window, 0, 23, 1920, 1177;
+    Window_Name = Output_Setting_Window, 735, 413, 480, 350;
     Window_Name = Artisoc_Help_Window, 10, 10, 400, 300;
 }
 
